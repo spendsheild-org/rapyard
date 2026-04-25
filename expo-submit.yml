@@ -1,0 +1,20 @@
+name: App Store Submit
+
+on:
+  workflow_dispatch:
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: npm install -g eas-cli
+
+      - name: Submit to Stores
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          eas submit -p android --latest --non-interactive
+          eas submit -p ios --latest --non-interactive
