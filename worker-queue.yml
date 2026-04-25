@@ -1,0 +1,26 @@
+name: Worker Queue
+
+on:
+  push:
+    branches: [ "worker" ]
+
+jobs:
+  worker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm install
+
+      - name: Deploy Worker
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+        run: |
+          echo "$SSH_KEY" > key.pem
+          chmod 600 key.pem
+          ssh -i key.pem user@server "pm2 restart worker"
