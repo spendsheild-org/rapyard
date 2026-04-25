@@ -1,0 +1,28 @@
+name: Admin Deploy
+
+on:
+  push:
+    branches: [ "admin" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - run: npm install
+      - run: npm run build --if-present
+
+      - name: Deploy to Server
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+        run: |
+          echo "$SSH_KEY" > key.pem
+          chmod 600 key.pem
+          rsync -avz --delete -e "ssh -i key.pem" build/ user@server:/var/www/admin
