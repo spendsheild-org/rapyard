@@ -1,0 +1,41 @@
+name: Canary Build
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches:
+      - "feature/**"
+      - "dev"
+      - "staging"
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - run: npm install
+      - run: npm run lint --if-present
+      - run: npm run typecheck --if-present
+
+      - run: npm install -g eas-cli
+      - run: npx expo doctor
+
+      - name: EAS Build (Canary)
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          eas build --platform android --profile preview --non-interactive
+          eas build --platform ios --profile preview --non-interactive
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: canary-builds
+          path: dist/**
