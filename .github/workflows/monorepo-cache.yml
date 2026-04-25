@@ -13,13 +13,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: "npm"
           cache-dependency-path: |
-            app/package-lock.json
-            admin/package-lock.json
-            worker/package-lock.json
-            modules/**/package-lock.json
+  app/package-lock.json
+  admin/package-lock.json
+  worker/package-lock.json
+  modules/**/package-lock.json
 
       - name: Install root dependencies (no workspaces)
         run: npm install --workspaces=false
