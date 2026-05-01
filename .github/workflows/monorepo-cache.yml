@@ -3,21 +3,38 @@ name: Monorepo Cache
 on:
   push:
     branches: [ "main" ]
+  pull_request:
 
 jobs:
   cache:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
+          node-version: 20
+          cache: "npm"
           cache-dependency-path: |
-  app/package-lock.json
-  admin/package-lock.json
-  worker/package-lock.json
-  modules/**/package-lock.json
+            apps/*/package-lock.json
+            packages/*/package-lock.json
+            package-lock.json
 
-      - name: Install root dependencies (no workspaces)
+      - name: Install root deps (no workspace traversal)
         run: npm install --workspaces=false
+
+      - name: Install workspace deps
+        run: npm install --workspaces
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Typecheck
+        run: npm run typecheck --if-present
+
+      - name: Test
+        run: npm test --if-present
+
